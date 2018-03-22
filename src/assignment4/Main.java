@@ -2,8 +2,8 @@ package assignment4;
 /* CRITTERS Main.java
  * EE422C Project 4 submission by
  * Replace <...> with your actual data.
- * <Student1 Name>
- * <Student1 EID>
+ * Brian Wilmarth
+ * bw24274
  * <Student1 5-digit Unique No.>
  * <Student2 Name>
  * <Student2 EID>
@@ -12,6 +12,7 @@ package assignment4;
  * Fall 2016
  */
 
+import java.text.ParseException;
 import java.util.Scanner;
 import java.io.*;
 
@@ -41,7 +42,7 @@ public class Main {
      * @param args args can be empty.  If not empty, provide two parameters -- the first is a file name, 
      * and the second is test (for test output, where all output to be directed to a String), or nothing.
      */
-    public static void main(String[] args) { 
+    public static void main(String[] args) throws ProcessingException {
         if (args.length != 0) {
             try {
                 inputFile = args[0];
@@ -70,10 +71,69 @@ public class Main {
         /* Do not alter the code above for your submission. */
         /* Write your code below. */
         
-        // System.out.println("GLHF");
-        
+        // TODO Write code here
+        // Test Code
+
+        // Actual Code
+        String input = new String();
+        String[] tokens = new String[3];
+
+        input = kb.nextLine();
+        tokens = input.split("\\s+");
+
+        while(!tokens[0].equals("quit")){
+            switch(tokens[0]){
+
+                case "show":
+                    Critter.displayWorld();
+                    break;
+
+                case "step":
+                    if(tokens.length > 1){
+                        for(int i = 0; i < Integer.parseInt(tokens[1]); i++){
+                            Critter.worldTimeStep();
+                        }
+                    }
+                    else{ Critter.worldTimeStep(); }
+                    // TODO add error checking
+                    break;
+
+                case "seed":
+                    try {
+                        Critter.setSeed(Integer.parseInt(tokens[1]));
+                    }
+                    catch (NumberFormatException e) {
+                        errorProcessing(input);
+                    }
+                    // TODO add error checking
+                    break;
+
+                case "make":
+                    int count;
+                    try {
+                        count = Integer.parseInt(tokens[2]);
+                        for(int i = 0; i < count; i++){
+                            Critter.makeCritter(tokens[1]);
+                        }
+                    } catch (InvalidCritterException e) {
+                        errorProcessing(input);
+                    }
+                    break;
+
+                case "stats":
+
+                    break;
+            }
+            input = kb.nextLine();
+            tokens = input.split("\\s+");
+        }
+
         /* Write your code above */
         System.out.flush();
 
+    }
+
+    static void errorProcessing(String badCommand){
+        System.out.println("error processing: " + badCommand);
     }
 }

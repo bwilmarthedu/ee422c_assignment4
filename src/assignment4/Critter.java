@@ -2,17 +2,15 @@ package assignment4;
 /* CRITTERS Critter.java
  * EE422C Project 4 submission by
  * Replace <...> with your actual data.
- * <Student1 Name>
- * <Student1 EID>
- * <Student1 5-digit Unique No.>
- * <Student2 Name>
- * <Student2 EID>
- * <Student2 5-digit Unique No.>
+ * Brian Wilmarth
+ * bw24274
+ * 15455
  * Slip days used: <0>
  * Fall 2016
  */
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 /* see the PDF for descriptions of the methods and fields in this class
@@ -51,13 +49,99 @@ public abstract class Critter {
 	private int y_coord;
 	
 	protected final void walk(int direction) {
+        // TODO TEST this method
+        move(direction, 1);
+        energy -= Params.walk_energy_cost;
 	}
 	
 	protected final void run(int direction) {
-		
+		// TODO TEST this method
+        move(direction, 2);
+        energy -= Params.run_energy_cost;
 	}
-	
+
+	private final void move(int direction, int distance){
+        switch(direction){
+            case 0:
+                x_coord = (x_coord + distance) % Params.world_width;
+                break;
+            case 1:
+                x_coord = (x_coord + distance) % Params.world_width;
+                if(y_coord - distance < 0){ y_coord = y_coord - distance + Params.world_height; }
+                else{ y_coord -= distance; }
+                break;
+            case 2:
+                if(y_coord - distance < 0){ y_coord = y_coord - distance + Params.world_height; }
+                else{ y_coord -= distance; }
+                break;
+            case 3:
+                if(x_coord - distance < 0){ x_coord = x_coord - distance + Params.world_width; }
+                else{ x_coord -= distance; }
+                if(y_coord - distance < 0){ y_coord = y_coord - distance + Params.world_height; }
+                else{ y_coord -= distance; }
+                break;
+            case 4:
+                if(x_coord - distance < 0){ x_coord = x_coord - distance + Params.world_width; }
+                else{ x_coord -= distance; }
+                break;
+            case 5:
+                if(x_coord - distance < 0){ x_coord = x_coord - distance + Params.world_width; }
+                else{ x_coord -= distance; }
+                y_coord = (y_coord + distance) % Params.world_height;
+                break;
+            case 6:
+                y_coord = (y_coord + distance) % Params.world_height;
+                break;
+            case 7:
+                x_coord = (x_coord + distance) % Params.world_width;
+                y_coord = (y_coord + distance) % Params.world_height;
+                break;
+        }
+    }
+
 	protected final void reproduce(Critter offspring, int direction) {
+        // TODO TEST this method.
+        if(this.energy > Params.min_reproduce_energy){
+            babies.add(offspring);
+            offspring.energy = (int) Math.floor(0.5 * this.energy);
+            this.energy = (int) Math.ceil(0.5 * this.energy);
+            switch(direction){
+                case 0:
+                    offspring.x_coord = (this.x_coord + 1) % Params.world_width;
+                    break;
+                case 1:
+                    offspring.x_coord = (this.x_coord + 1) % Params.world_width;
+                    if(this.y_coord - 1 < 0){ offspring.y_coord = this.y_coord - 1 + Params.world_height; }
+                    else{ offspring.y_coord = this.y_coord - 1; }
+                    break;
+                case 2:
+                    if(this.y_coord - 1 < 0){ offspring.y_coord = this.y_coord - 1 + Params.world_height; }
+                    else{ offspring.y_coord = this.y_coord - 1; }
+                    break;
+                case 3:
+                    if(this.x_coord - 1 < 0){ offspring.x_coord = this.x_coord - 1 + Params.world_width; }
+                    else{ offspring.x_coord = this.x_coord - 1; }
+                    if(this.y_coord - 1 < 0){ offspring.y_coord = this.y_coord - 1 + Params.world_height; }
+                    else{ offspring.y_coord = this.y_coord - 1; }
+                    break;
+                case 4:
+                    if(this.x_coord - 1 < 0){ offspring.x_coord = this.x_coord - 1 + Params.world_width; }
+                    else{ offspring.x_coord = this.x_coord - 1; }
+                    break;
+                case 5:
+                    if(this.x_coord - 1 < 0){ offspring.x_coord = this.x_coord - 1 + Params.world_width; }
+                    else{ offspring.x_coord = this.x_coord - 1; }
+                    offspring.y_coord = (this.y_coord + 1) % Params.world_height;
+                    break;
+                case 6:
+                    offspring.y_coord = (this.y_coord + 1) % Params.world_height;
+                    break;
+                case 7:
+                    offspring.x_coord = (this.x_coord + 1) % Params.world_width;
+                    offspring.y_coord = (this.y_coord + 1) % Params.world_height;
+                    break;
+            }
+        }
 	}
 
 	public abstract void doTimeStep();
@@ -74,6 +158,18 @@ public abstract class Critter {
 	 * @throws InvalidCritterException
 	 */
 	public static void makeCritter(String critter_class_name) throws InvalidCritterException {
+	    // TODO TEST this method.
+        try {
+            Class c = Class.forName(myPackage + "." + critter_class_name);
+            Critter cr = (Critter) c.newInstance();
+            population.add(cr);
+            cr.x_coord = getRandomInt(Params.world_width);
+            cr.y_coord = getRandomInt(Params.world_height);
+            cr.energy = Params.start_energy;
+        }
+        catch (Exception e) {
+            throw new InvalidCritterException(critter_class_name);
+        }
 	}
 	
 	/**
@@ -83,8 +179,20 @@ public abstract class Critter {
 	 * @throws InvalidCritterException
 	 */
 	public static List<Critter> getInstances(String critter_class_name) throws InvalidCritterException {
+	    // TODO TEST this method.
 		List<Critter> result = new java.util.ArrayList<Critter>();
-	
+        try {
+            Class c = Class.forName(myPackage + "." + critter_class_name);
+            for(int i = 0; i < population.size(); i++){
+                Critter tempCritter = population.get(i);
+                if(c.equals(tempCritter.getClass())){
+                    result.add(tempCritter);
+                }
+            }
+        }
+        catch(Exception e){
+            throw new InvalidCritterException(critter_class_name);
+        }
 		return result;
 	}
 	
@@ -168,14 +276,71 @@ public abstract class Critter {
 	 * Clear the world of all critters, dead and alive
 	 */
 	public static void clearWorld() {
-		// Complete this method.
+	    // TODO TEST this method.
+        population.clear();
 	}
 	
 	public static void worldTimeStep() {
-		// Complete this method.
+		// TODO Complete this method.
+        // 1. Increment Timestep
+        // 2. doTimeSteps();
+        for(Critter c : population){
+            c.doTimeStep();
+        }
+        // 3. doEncounters();
+
+        // 4. updateRestEnergy();
+        for(Critter c : population){
+            c.energy -= Params.rest_energy_cost;
+        }
+        // 5. genAlgae();
+
+        // 6. moveBabies();
+        population.addAll(babies);
+        babies.clear();
 	}
 	
 	public static void displayWorld() {
-		// Complete this method.
+		// TODO TEST this method.
+        char[][] world = new char[Params.world_height + 2][Params.world_width + 2];
+        // populate borders and inside
+        world[0][0] = '+';
+        world[0][Params.world_width + 1] = '+';
+        world[Params.world_height + 1][0] = '+';
+        world[Params.world_height + 1][Params.world_width + 1] = '+';
+        for(int i = 1; i < Params.world_height + 1; i++){
+            world[i][0] = '|';
+            world[i][Params.world_width + 1] = '|';
+            for(int j = 1; j < Params.world_width + 1; j++){
+                world[i][j] = ' ';
+            }
+        }
+        for(int j = 1; j < Params.world_width + 1; j++){
+            world[0][j] = '-';
+            world[Params.world_height + 1][j] = '-';
+        }
+        // Populate with critters
+        for(Critter c : population){
+            world[c.y_coord + 1][c.x_coord + 1] = c.toString().charAt(0);
+        }
+        // Print world
+        for(int i = 0; i < Params.world_height + 2; i++){
+            System.out.println(world[i]);
+        }
+
 	}
+
+	private static void doEncounters(){
+	    List<Critter> crittersOnSquare = new ArrayList<Critter>();
+	    for(int i = 0; i < Params.world_height; i++){
+	        for(int j = 0; j < Params.world_width; j++){
+	            for(Critter c : population){
+	                if(c.x_coord == i && c.y_coord == j){
+	                    crittersOnSquare.add(c);
+                    }
+                }
+            }
+        }
+        
+    }
 }
