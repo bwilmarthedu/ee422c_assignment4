@@ -47,19 +47,32 @@ public abstract class Critter {
 	
 	private int x_coord;
 	private int y_coord;
-	
+
+    /**
+     * Moves one space in a given direction and deducts Params.walk_energy_cost from the Critter.
+     * @param direction direction to move
+     */
 	protected final void walk(int direction) {
         // TODO TEST this method
         move(direction, 1);
         energy -= Params.walk_energy_cost;
 	}
-	
+
+    /**
+     * Moves two spaces in a given direction and deducts Params.run_energy_cost from the Critter.
+     * @param direction direction to move two spaces
+     */
 	protected final void run(int direction) {
 		// TODO TEST this method
         move(direction, 2);
         energy -= Params.run_energy_cost;
 	}
 
+    /**
+     * Moves a specified distance in a given direction
+     * @param direction direction to move
+     * @param distance how far to move
+     */
 	private final void move(int direction, int distance){
         switch(direction){
             case 0:
@@ -99,6 +112,11 @@ public abstract class Critter {
         }
     }
 
+    /**
+     * This method places offspring adjacent to a Critter in the world at a specified direction.
+     * @param offspring child Critter to be placed
+     * @param direction direction in which to place the child Critter
+     */
 	protected final void reproduce(Critter offspring, int direction) {
         // TODO TEST this method.
         if(this.energy > Params.min_reproduce_energy){
@@ -179,7 +197,6 @@ public abstract class Critter {
 	 * @throws InvalidCritterException
 	 */
 	public static List<Critter> getInstances(String critter_class_name) throws InvalidCritterException {
-	    // TODO TEST this method.
 		List<Critter> result = new java.util.ArrayList<Critter>();
         try {
             Class c = Class.forName(myPackage + "." + critter_class_name);
@@ -276,32 +293,42 @@ public abstract class Critter {
 	 * Clear the world of all critters, dead and alive
 	 */
 	public static void clearWorld() {
-	    // TODO TEST this method.
         population.clear();
 	}
-	
+
+    /**
+     * This method simulates one time step of the world.
+     */
 	public static void worldTimeStep() {
-		// TODO Complete this method.
         // 1. Increment Timestep
         // 2. doTimeSteps();
         for(Critter c : population){
             c.doTimeStep();
         }
         // 3. doEncounters();
-
+        doEncounters();
+        removeDead();
         // 4. updateRestEnergy();
         for(Critter c : population){
             c.energy -= Params.rest_energy_cost;
         }
-        // 5. genAlgae();
-
-        // 6. moveBabies();
+        removeDead();
+        // 6. genAlgae();
+        for(int i = 0; i < Params.refresh_algae_count; i++){
+            try {
+                makeCritter("Algae");
+            }
+            catch(InvalidCritterException e){ }
+        }
+        // 7. moveBabies();
         population.addAll(babies);
         babies.clear();
 	}
-	
+
+    /**
+     * This method displays a rudimentary model of the world in System.out.
+     */
 	public static void displayWorld() {
-		// TODO TEST this method.
         char[][] world = new char[Params.world_height + 2][Params.world_width + 2];
         // populate borders and inside
         world[0][0] = '+';
@@ -327,20 +354,71 @@ public abstract class Critter {
         for(int i = 0; i < Params.world_height + 2; i++){
             System.out.println(world[i]);
         }
-
+        world[0][0] = '+';
 	}
 
+    /**
+     * This method performs resolves all encounters that are occurring in the world.
+     */
 	private static void doEncounters(){
 	    List<Critter> crittersOnSquare = new ArrayList<Critter>();
 	    for(int i = 0; i < Params.world_height; i++){
 	        for(int j = 0; j < Params.world_width; j++){
 	            for(Critter c : population){
-	                if(c.x_coord == i && c.y_coord == j){
+	                if(c.x_coord == i && c.y_coord == j && c.energy > 0){
 	                    crittersOnSquare.add(c);
                     }
                 }
+                while (crittersOnSquare.size() > 1) {
+                    // Pick two critters
+                    Critter a = crittersOnSquare.remove(0);
+                    Critter b = crittersOnSquare.remove(0);
+                    // encounter
+                    Critter winner = encounter(a, b);
+                    crittersOnSquare.add(winner);
+                }
+                crittersOnSquare.clear();
             }
         }
-        
     }
+
+    /**
+     * This method resolves one encounter between Critter a and Critter b
+     * @param a The first critter
+     * @param b The second Critter
+     * @return returns the critter that won the fight
+     */
+    private static Critter encounter(Critter a, Critter b){
+	    boolean afight, bfight;
+	    int aroll, broll;
+	    afight = a.fight(b.toString());
+	    bfight = b.fight(a.toString());
+	    if(afight){ aroll = getRandomInt(a.energy); }
+	    else{ aroll = 0; }
+	    if(bfight){ broll = getRandomInt(b.energy); }
+	    else{ broll = 0; }
+	    if(aroll >= broll){
+	        a.energy += b.energy/2;
+	        b.energy = 0;
+	        return a;
+	    }
+	    else{
+	        b.energy += a.energy/2;
+	        a.energy = 0;
+	        return b;
+	    }
+    }
+
+    /**
+     * This method removes all Critters from the world that have less than or equal to 0 energy.
+     */
+    private static void removeDead(){
+        for(int i = 0; i < population.size(); i++){
+            Critter c = population.get(i);
+            if(c.energy <= 0){
+                population.remove(c);
+            }
+        }
+    }
+
 }

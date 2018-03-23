@@ -4,17 +4,19 @@ package assignment4;
  * Replace <...> with your actual data.
  * Brian Wilmarth
  * bw24274
- * <Student1 5-digit Unique No.>
- * <Student2 Name>
- * <Student2 EID>
- * <Student2 5-digit Unique No.>
+ * 15455
  * Slip days used: <0>
- * Fall 2016
+ * Spring 2018
  */
+
+import java.lang.reflect.Array;
 
 import java.text.ParseException;
 import java.util.Scanner;
 import java.io.*;
+
+import java.lang.reflect.Method;
+import java.util.List;
 
 
 /*
@@ -42,7 +44,7 @@ public class Main {
      * @param args args can be empty.  If not empty, provide two parameters -- the first is a file name, 
      * and the second is test (for test output, where all output to be directed to a String), or nothing.
      */
-    public static void main(String[] args) throws ProcessingException {
+    public static void main(String[] args) {
         if (args.length != 0) {
             try {
                 inputFile = args[0];
@@ -89,12 +91,23 @@ public class Main {
                     break;
 
                 case "step":
-                    if(tokens.length > 1){
-                        for(int i = 0; i < Integer.parseInt(tokens[1]); i++){
+                    try {
+                        if (tokens.length > 1) {
+                            for (int i = 0; i < Integer.parseInt(tokens[1]); i++) {
+                                Critter.worldTimeStep();
+                                Critter.displayWorld(); // TEST
+                            }
+                        } else {
                             Critter.worldTimeStep();
+                            Critter.displayWorld(); // TEST
                         }
                     }
-                    else{ Critter.worldTimeStep(); }
+                    catch(NumberFormatException e){
+                        errorProcessing(input);
+                    }
+                    catch(ArrayIndexOutOfBoundsException e){
+                        errorProcessing(input);
+                    }
                     // TODO add error checking
                     break;
 
@@ -105,24 +118,53 @@ public class Main {
                     catch (NumberFormatException e) {
                         errorProcessing(input);
                     }
+                    catch (ArrayIndexOutOfBoundsException e){
+                        errorProcessing(input);
+
+                    }
                     // TODO add error checking
                     break;
 
                 case "make":
                     int count;
-                    try {
-                        count = Integer.parseInt(tokens[2]);
-                        for(int i = 0; i < count; i++){
+                    if(tokens.length == 3) {
+                        try {
+                            count = Integer.parseInt(tokens[2]);
+                            for (int i = 0; i < count; i++) {
+                                Critter.makeCritter(tokens[1]);
+                            }
+                        } catch (InvalidCritterException e) {
+                            errorProcessing(input);
+                        }
+                        catch (ArrayIndexOutOfBoundsException e) {
+                            errorProcessing(input);
+                        }
+                    }
+                    else{
+                        try{
                             Critter.makeCritter(tokens[1]);
                         }
-                    } catch (InvalidCritterException e) {
-                        errorProcessing(input);
+                        catch (InvalidCritterException e){
+                            errorProcessing(input);
+                        }
+                        catch (ArrayIndexOutOfBoundsException e){
+                            errorProcessing(input);
+                        }
                     }
                     break;
 
                 case "stats":
-
+                    try {
+                        Class<Critter> c = (Class<Critter>) Class.forName(myPackage + "." + tokens[1]);
+                        Method method = c.getMethod("runStats", List.class);
+                        method.invoke(c, Critter.getInstances(tokens[1]));
+                    }
+                    catch (Exception e){
+                        errorProcessing(input);
+                    }
                     break;
+                default:
+                    errorProcessing(input);
             }
             input = kb.nextLine();
             tokens = input.split("\\s+");
@@ -133,7 +175,11 @@ public class Main {
 
     }
 
-    static void errorProcessing(String badCommand){
+    /**
+     * Prints out an error processing message
+     * @param badCommand the command to print
+     */
+    private static void errorProcessing(String badCommand){
         System.out.println("error processing: " + badCommand);
     }
 }
