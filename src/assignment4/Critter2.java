@@ -65,7 +65,7 @@ public class Critter2 extends Critter{
 
     /**
      * Prints stats for a list fo Critter2s
-     * @param critter2s the list of Critter2s
+     * @param critter2s the list of Critters
      */
     public static void runStats(java.util.List<Critter> critter2s) {
         System.out.println("" + critter2s.size() + " total Critter1s    ");

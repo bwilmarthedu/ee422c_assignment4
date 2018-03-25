@@ -87,67 +87,61 @@ public class Main {
             switch(tokens[0]){
 
                 case "show":
-                    Critter.displayWorld();
+                    try {
+                        if (tokens.length > 1) { throw new Exception(); }
+                        Critter.displayWorld();
+                    }
+                    catch(Exception e){
+                        errorProcessing(input);
+                    }
                     break;
 
                 case "step":
                     try {
                         if (tokens.length > 1) {
+                            if(tokens.length > 2){ throw new Exception(); }
                             for (int i = 0; i < Integer.parseInt(tokens[1]); i++) {
                                 Critter.worldTimeStep();
-                                Critter.displayWorld(); // TEST
                             }
                         } else {
+                            if(tokens.length > 1){ throw new Exception(); }
                             Critter.worldTimeStep();
-                            Critter.displayWorld(); // TEST
                         }
                     }
-                    catch(NumberFormatException e){
+                    catch(Exception e){
                         errorProcessing(input);
                     }
-                    catch(ArrayIndexOutOfBoundsException e){
-                        errorProcessing(input);
-                    }
-                    // TODO add error checking
                     break;
 
                 case "seed":
                     try {
+                        if(tokens.length > 2){ throw new Exception(); }
                         Critter.setSeed(Integer.parseInt(tokens[1]));
                     }
-                    catch (NumberFormatException e) {
+                    catch(Exception e){
                         errorProcessing(input);
                     }
-                    catch (ArrayIndexOutOfBoundsException e){
-                        errorProcessing(input);
-
-                    }
-                    // TODO add error checking
                     break;
 
                 case "make":
                     int count;
                     if(tokens.length == 3) {
                         try {
+                            if(tokens.length > 3){ throw new Exception(); }
                             count = Integer.parseInt(tokens[2]);
                             for (int i = 0; i < count; i++) {
                                 Critter.makeCritter(tokens[1]);
                             }
-                        } catch (InvalidCritterException e) {
-                            errorProcessing(input);
-                        }
-                        catch (ArrayIndexOutOfBoundsException e) {
+                        } catch (Exception e) {
                             errorProcessing(input);
                         }
                     }
                     else{
                         try{
+                            if(tokens.length > 2){ throw new Exception(); }
                             Critter.makeCritter(tokens[1]);
                         }
-                        catch (InvalidCritterException e){
-                            errorProcessing(input);
-                        }
-                        catch (ArrayIndexOutOfBoundsException e){
+                        catch (Exception e){
                             errorProcessing(input);
                         }
                     }
@@ -155,6 +149,7 @@ public class Main {
 
                 case "stats":
                     try {
+                        if(tokens.length > 2){ throw new Exception(); }
                         Class<Critter> c = (Class<Critter>) Class.forName(myPackage + "." + tokens[1]);
                         Method method = c.getMethod("runStats", List.class);
                         method.invoke(c, Critter.getInstances(tokens[1]));

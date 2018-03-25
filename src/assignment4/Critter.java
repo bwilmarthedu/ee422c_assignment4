@@ -118,7 +118,6 @@ public abstract class Critter {
      * @param direction direction in which to place the child Critter
      */
 	protected final void reproduce(Critter offspring, int direction) {
-        // TODO TEST this method.
         if(this.energy > Params.min_reproduce_energy){
             babies.add(offspring);
             offspring.energy = (int) Math.floor(0.5 * this.energy);
@@ -176,7 +175,6 @@ public abstract class Critter {
 	 * @throws InvalidCritterException
 	 */
 	public static void makeCritter(String critter_class_name) throws InvalidCritterException {
-	    // TODO TEST this method.
         try {
             Class c = Class.forName(myPackage + "." + critter_class_name);
             Critter cr = (Critter) c.newInstance();
